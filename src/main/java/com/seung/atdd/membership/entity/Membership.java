@@ -1,5 +1,6 @@
 package com.seung.atdd.membership.entity;
 
+import com.seung.atdd.membership.enums.MembershipType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,8 +24,8 @@ public class Membership {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 20)
-    private String membershipName;
+    @Enumerated(EnumType.STRING)
+    private MembershipType membershipType;
 
     @Column(nullable = false)
     private String userId;
