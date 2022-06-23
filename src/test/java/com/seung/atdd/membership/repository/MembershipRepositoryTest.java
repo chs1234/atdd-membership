@@ -17,6 +17,28 @@ public class MembershipRepositoryTest {
     private MembershipRepository membershipRepository;
 
     /*
+    TODO TDD로 멤버십 삭제 및 포인트 적립 API 구현 예제 - (5/5)
+    https://mangkyu.tistory.com/186
+     */
+
+    @Test
+    public void 멤버십추가후삭제() {
+        // given
+        final Membership naverMembership = Membership.builder()
+                .userId("userId")
+                .membershipType(MembershipType.NAVER)
+                .point(10000)
+                .build();
+
+        final Membership savedMembership = membershipRepository.save(naverMembership);
+
+        // when
+        membershipRepository.deleteById(savedMembership.getId());
+
+        // then
+    }
+
+    /*
     TODO TDD로 멤버십 전체/상세 조회 API 구현 예제 - (4/5)
     https://mangkyu.tistory.com/185
      */
