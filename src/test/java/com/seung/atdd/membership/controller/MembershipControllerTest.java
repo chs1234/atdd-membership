@@ -2,8 +2,9 @@ package com.seung.atdd.membership.controller;
 
 import com.google.gson.Gson;
 import com.seung.atdd.membership.common.GlobalExceptionHandler;
+import com.seung.atdd.membership.dto.MembershipDetailResponse;
 import com.seung.atdd.membership.dto.MembershipRequest;
-import com.seung.atdd.membership.dto.MembershipResponse;
+import com.seung.atdd.membership.dto.MembershipAddResponse;
 import com.seung.atdd.membership.enums.MembershipType;
 import com.seung.atdd.membership.exception.MembershipErrorResult;
 import com.seung.atdd.membership.exception.MembershipException;
@@ -23,8 +24,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.lang.reflect.Member;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static com.seung.atdd.membership.common.MembershipConstants.USER_ID_HEADER;
@@ -52,6 +53,51 @@ public class MembershipControllerTest {
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
+
+    /*
+    TODO TDD로 멤버십 전체/상세 조회 API 구현 예제 - (4/5)
+    https://mangkyu.tistory.com/185
+     */
+
+    @Test
+    public void 멤버십목록조회실패_사용자식별값이헤더에없음() throws Exception {
+        // given
+        final String url = "/api/v1/memberships";
+
+        // when
+        final ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+        );
+
+        // then
+        resultActions.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void 멤버십목록조회성공() throws Exception {
+        // given
+        final String url = "/api/v1/memberships";
+        doReturn(Arrays.asList(
+                MembershipDetailResponse.builder().build(),
+                MembershipDetailResponse.builder().build(),
+                MembershipDetailResponse.builder().build()
+        )).when(membershipService).getMembershipList("12345");
+
+        // when
+        final ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                        .header(USER_ID_HEADER, "12345")
+        );
+
+        // then
+        resultActions.andExpect(status().isOk());
+    }
+
+
+    /*
+    TODO TDD로 멤버십 등록 API 구현 예제 - (3/5)
+    https://mangkyu.tistory.com/184?category=761302
+     */
 
     @ParameterizedTest
     @MethodSource("invalidMembershipAddParameter")
@@ -83,7 +129,7 @@ public class MembershipControllerTest {
     public void 멤버십등록성공() throws Exception {
         // given
         final String url = "/api/v1/memberships";
-        final MembershipResponse membershipResponse =MembershipResponse.builder()
+        final MembershipAddResponse membershipResponse = MembershipAddResponse.builder()
                 .id(-1L)
                 .membershipType(MembershipType.NAVER)
                 .build();
@@ -101,9 +147,9 @@ public class MembershipControllerTest {
         // then
         resultActions.andExpect(status().isCreated());
 
-        final MembershipResponse response = gson.fromJson(resultActions.andReturn()
+        final MembershipAddResponse response = gson.fromJson(resultActions.andReturn()
                 .getResponse()
-                .getContentAsString(StandardCharsets.UTF_8), MembershipResponse.class);
+                .getContentAsString(StandardCharsets.UTF_8), MembershipAddResponse.class);
 
         assertThat(response.getMembershipType()).isEqualTo(MembershipType.NAVER);
         assertThat(response.getId()).isNotNull();
